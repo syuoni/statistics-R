@@ -23,6 +23,9 @@ exp.gr <- function(beta, args){
   return(-gr)
 }
 
+# t: vector of duration time
+# X: matrix of explanatory variables
+# d: vector of whether the sample is failed (1=failure)
 mle.exp.estimate <- function(t, X, d){
   args <- list(t=t, X=as.matrix(X), d=d)
   

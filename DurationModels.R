@@ -1,4 +1,5 @@
 # Duration Models Estimation with MLE
+setwd('D:/Documents/R/Statistics and Econometrics')
 source('MLE.R')
 
 exp.lnlike <- function(beta, args){
@@ -8,7 +9,8 @@ exp.lnlike <- function(beta, args){
   d <- args$d
   X <- args$X
   
-  Xb <- X %*% beta
+  # A %*% B always return a matrix, transfrom it to a vector
+  Xb <- as.vector(X %*% beta)
   lnlike <- d*Xb - exp(Xb)*t
   return(-sum(lnlike))
 }
@@ -18,8 +20,8 @@ exp.gr <- function(beta, args){
   d <- args$d
   X <- args$X
   
-  Xb <- X %*% beta
-  gr <- apply(as.vector(d-exp(Xb)*t) * X, 2, sum)
+  Xb <- as.vector(X %*% beta)
+  gr <- apply((d-exp(Xb)*t) * X, 2, sum)
   return(-gr)
 }
 
@@ -39,7 +41,7 @@ mle.exp.estimate <- function(t, X, d){
 }
 
 weibull.lnlike <- function(theta, args){
-  # the last one element in theta is lnp (scalar), 
+  # the last element in theta is lnp (scalar), 
   # and the others is beta (vector)
   n.theta <- length(theta)
   beta <- theta[1:n.theta-1]
@@ -51,7 +53,7 @@ weibull.lnlike <- function(theta, args){
   d <- args$d
   X <- args$X
   
-  Xb <- X %*% beta
+  Xb <- as.vector(X %*% beta)
   lnlike <- d*(Xb+lnp+(exp(lnp)-1)*log(t)) - exp(Xb)*(t**exp(lnp))
   return(-sum(lnlike))
 }
@@ -66,8 +68,8 @@ weibull.gr <- function(theta, args){
   X <- args$X
   
   p <- exp(lnp)
-  Xb <- X %*% beta
-  beta.gr <- apply(as.vector(d-exp(Xb)*(t**p)) * X, 2, sum)
+  Xb <- as.vector(X %*% beta)
+  beta.gr <- apply((d-exp(Xb)*(t**p)) * X, 2, sum)
   lnp.gr <- sum(d*(1+log(t)*p) - exp(Xb)*(t**p)*log(t)*p)
   return(-append(beta.gr, lnp.gr))
 }
@@ -80,25 +82,72 @@ mle.weibull.estimate <- function(t, X, d){
   return(model.res)
 }
 
+gompertz.lnlike <- function(theta, args){
+  # the last element in theta is gamma (scalar), 
+  # and the others is beta (vector)
+  n.theta <- length(theta)
+  beta <- theta[1:n.theta-1]
+  gamma <- theta[n.theta]
+  
+  t <- args$t
+  d <- args$d
+  X <- args$X
+  
+  Xb <- as.vector(X %*% beta)
+  lnlike <- d*(Xb+gamma*t) - exp(Xb)*(exp(gamma*t)-1)/gamma
+  return(-sum(lnlike))
+}
+
+gompertz.gr <- function(theta, args){
+  n.theta <- length(theta)
+  beta <- theta[1:n.theta-1]
+  gamma <- theta[n.theta]
+  
+  t <- args$t
+  d <- args$d
+  X <- args$X
+  
+  Xb <- as.vector(X %*% beta)
+  beta.gr <- apply((d-exp(Xb)*(exp(gamma*t)-1)/gamma) * X, 2, sum)
+  gamma.gr <- sum(d*t - exp(Xb)*(exp(gamma*t)*(gamma*t-1)+1)/gamma**2)
+  return(-append(beta.gr, gamma.gr))
+}
+
+mle.gompertz.estimate <- function(t, X, d){
+  args <- list(t=t, X=as.matrix(X), d=d)
+  params0 <- rep(1e-5, length(X)+1)
+  names(params0) <- c(colnames(X), 'gamma')
+  model.res <- mle.model(gompertz.lnlike, args, params0=params0, gr=gompertz.gr)
+  return(model.res)
+}
+
 duration.demo <- function(){
   setwd('D:/Documents/R/Statistics and Econometrics')
   
   library('foreign')
   df <- read.dta('recid.dta')
   all.params <- c('workprg', 'priors', 'tserved', 'felon', 'alcohol',
-                  'drugs', 'black', 'married', 'educ', 'age', 'lnp')
+                  'drugs', 'black', 'married', 'educ', 'age', 'lnp', 'gamma')
   
   X <- df[c('workprg', 'priors', 'tserved', 'felon', 'alcohol',
             'drugs', 'black', 'married', 'educ', 'age')]
   X$const <- 1
   
   exp.res <- mle.exp.estimate(df$durat, X, 1-df$cens)
-  # exponential model result from Stata 
-  # stata_params <- c(.09558006, .09133702, .01440089, -.31222409, .46767064, .29416476, 
+  # exponential model result from Stata
+  # args <- list(t=df$durat, X=as.matrix(X), d=1-df$cens)
+  # stata_params <- c(.09558006, .09133702, .01440089, -.31222409, .46767064, .29416476,
   #                   .47567491, -.1519512, -.02421234, -.00391121, -4.169213)
+  # print(exp.lnlike(stata_params, args), digits=10)
   
   weibull.res <- mle.weibull.estimate(df$durat, X, 1-df$cens)
-  res.table <- mle.res.table.export(list(exp.res, weibull.res), all.params)
+  gompertz.res <- mle.gompertz.estimate(df$durat, X, 1-df$cens)
+  
+  # gompertz model result from stata
+  # stata_params <- c(.08532224, .08691561, .01288472, -.28549804, .42928766, .27253692,
+  #                   .43281454, -.15295268, -.02185928, -.00356317, -3.6110097, -.02170298)
+  # print(gompertz.lnlike(stata_params, args), digits=10)
+  res.table <- mle.res.table.export(list(exp.res, weibull.res, gompertz.res), all.params)
   print(res.table)
 }
 

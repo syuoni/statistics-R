@@ -1,4 +1,5 @@
 # Maximun Likelihood Estimation Model
+setwd('D:/Documents/R/Statistics and Econometrics')
 source('ModelExport.R')
 
 # Maximun Likelihood Estimation Model

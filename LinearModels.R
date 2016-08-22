@@ -1,4 +1,5 @@
 # Linear Models Estimation with MLE
+setwd('D:/Documents/R/Statistics and Econometrics')
 source('MLE.R')
 
 # y~const
@@ -42,8 +43,6 @@ mle.linear.estimate <- function(y, X){
 }
 
 mle.linear.demo <- function(){
-  setwd('D:/Documents/R/Statistics and Econometrics')
-  
   df <- read.csv('reg.csv')
   df$const <- 1
   all.params <- c('x1', 'x2', 'x3', 'x4', 'x5', 'const', 'sigma')

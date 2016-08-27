@@ -122,8 +122,6 @@ mle.gompertz.estimate <- function(t, X, d){
 }
 
 duration.demo <- function(){
-  setwd('D:/Documents/R/Statistics and Econometrics')
-  
   library('foreign')
   df <- read.dta('recid.dta')
   all.params <- c('workprg', 'priors', 'tserved', 'felon', 'alcohol',

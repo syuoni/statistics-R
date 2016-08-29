@@ -60,7 +60,7 @@ weibull.lnlike <- function(theta, args){
 
 weibull.gr <- function(theta, args){
   n.theta <- length(theta)
-  beta <- theta[1:n.theta-1]
+  beta <- theta[1:(n.theta-1)]
   lnp <- theta[n.theta]
   
   t <- args$t
@@ -71,7 +71,7 @@ weibull.gr <- function(theta, args){
   Xb <- as.vector(X %*% beta)
   beta.gr <- apply((d-exp(Xb)*(t**p)) * X, 2, sum)
   lnp.gr <- sum(d*(1+log(t)*p) - exp(Xb)*(t**p)*log(t)*p)
-  return(-append(beta.gr, lnp.gr))
+  return(-c(beta.gr, lnp.gr))
 }
 
 mle.weibull.estimate <- function(t, X, d){
@@ -110,7 +110,7 @@ gompertz.gr <- function(theta, args){
   Xb <- as.vector(X %*% beta)
   beta.gr <- apply((d-exp(Xb)*(exp(gamma*t)-1)/gamma) * X, 2, sum)
   gamma.gr <- sum(d*t - exp(Xb)*(exp(gamma*t)*(gamma*t-1)+1)/gamma**2)
-  return(-append(beta.gr, gamma.gr))
+  return(-c(beta.gr, gamma.gr))
 }
 
 mle.gompertz.estimate <- function(t, X, d){

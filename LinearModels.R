@@ -15,7 +15,9 @@ normal.lnlike <- function(theta, args){
 # y~X
 linear.lnlike <- function(theta, args){
   n.theta <- length(theta)
-  beta <- theta[1:n.theta-1]
+  # 1:n-1 is (1:n)-1, namely c(0, 1, 2, ..., n-1)
+  # 1:(n-1) is c(1, 2, 3, ..., n-1)
+  beta <- theta[1:(n.theta-1)]
   sigma <- theta[n.theta]
   
   y <- args$y
@@ -24,6 +26,7 @@ linear.lnlike <- function(theta, args){
   
   # With specifying sigma <- abs(sigma), there would be no warnings
   # sigma may be estimated to be negative
+  # general solution: sigma should be transformed to ln(sigma)
   sigma <- abs(sigma)
   ln.prob.density <- dnorm(e, mean=0., sd=sigma, log=TRUE)
   return(-sum(ln.prob.density))

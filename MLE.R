@@ -1,6 +1,7 @@
 # Maximun Likelihood Estimation Model
 setwd('D:/Documents/R/Statistics and Econometrics')
 source('ModelExport.R')
+source('Util.R')
 
 # Maximun Likelihood Estimation Model
 # lnlike:  log-likelihood function

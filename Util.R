@@ -26,3 +26,27 @@ numeric.gr.demo <- function(){
 }
 
 # numeric.gr.demo()
+
+# drop NA samples for args
+na.drop <- function(args, assign.lbs=NULL, exempt.cond=FALSE){
+  if(is.null(assign.lbs)){
+    assign.lbs <- names(args)
+  }
+  na.indicator <- NULL
+  for(lb in assign.lbs){
+    na.indicator <- cbind(na.indicator, is.na(args[[lb]]))
+  }
+  drop.indicator <- apply(na.indicator, 1, any) & (!exempt.cond)
+  
+  model.args <- list()
+  for(lb in names(args)){
+    if(is.vector(args[[lb]])){
+      model.args[[lb]] <- args[[lb]][!drop.indicator]
+    }else{
+      model.args[[lb]] <- args[[lb]][!drop.indicator, ]
+    }
+  }
+  return(model.args)
+}
+
+

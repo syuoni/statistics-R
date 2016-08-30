@@ -1,7 +1,6 @@
 # Duration Models Estimation with MLE
 setwd('D:/Documents/R/Statistics and Econometrics')
 source('MLE.R')
-source('Util.R')
 
 heckman.lnlike <- function(theta, args){
   # y~X * beta is the regression model

@@ -22,9 +22,10 @@ probit.gr <- function(beta, args){
 
 mle.probit.estimate <- function(y, X){
   args <- list(y=y, X=as.matrix(X))
+  args <- na.drop(args)
   
-  params0 <- rep(1e-5, length(X))
-  names(params0) <- colnames(X)
+  params0 <- rep(1e-5, dim(args$X)[2])
+  names(params0) <- colnames(args$X)
   model.res <- mle.model(probit.lnlike, args, params0=params0, gr=probit.gr)
   return(model.res)
 }
@@ -51,21 +52,21 @@ logit.gr <- function(beta, args){
 
 mle.logit.estimate <- function(y, X){
   args <- list(y=y, X=as.matrix(X))
+  args <- na.drop(args)
   
-  params0 <- rep(1e-5, length(X))
-  names(params0) <- colnames(X)
+  params0 <- rep(1e-5, dim(args$X)[2])
+  names(params0) <- colnames(args$X)
   model.res <- mle.model(logit.lnlike, args, params0=params0, gr=logit.gr)
   return(model.res)
 }
 
 binary.demo <- function(){
   df <- read.csv('reg.csv')
-  df$const <- 1
-  all.params <- c('x1', 'x2', 'x3', 'x4', 'const')
+  all.params <- c('x1', 'x2', 'x3', 'x4')
   y <- ifelse(df$y > 18, 1, 0)
   
-  probit.res <- mle.probit.estimate(y, df[c('x1', 'x3', 'x4', 'const')])
-  logit.res <- mle.logit.estimate(y, df[c('x1', 'x3', 'x4', 'const')])
+  probit.res <- mle.probit.estimate(y, df[c('x1', 'x3', 'x4')])
+  logit.res <- mle.logit.estimate(y, df[c('x1', 'x3', 'x4')])
   
   res.table <- mle.res.table.export(list(probit.res, logit.res), all.params)
   print(res.table)

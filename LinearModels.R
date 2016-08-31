@@ -34,25 +34,25 @@ linear.lnlike <- function(theta, args){
 
 mle.linear.estimate <- function(y, X){
   args <- list(y=y, X=as.matrix(X))
+  args <- na.drop(args)
   
   # converge only when the initial params are specified accurately
   # BFGS method can converge, with warnings? but BFGS fails in Python
   # With specifying sigma <- abs(sigma), there would be no warnings
   # params0 <- c(1, 1, 1, -0.05, 0.5, 0.27)
-  params0 <- rep(1, length(X)+1)
-  names(params0) <- c(colnames(X), 'sigma')
+  params0 <- rep(1, dim(args$X)[2]+1)
+  names(params0) <- c(colnames(args$X), 'sigma')
   model.res <- mle.model(linear.lnlike, args, params0=params0)
   return(model.res)
 }
 
 mle.linear.demo <- function(){
   df <- read.csv('reg.csv')
-  df$const <- 1
-  all.params <- c('x1', 'x2', 'x3', 'x4', 'x5', 'const', 'sigma')
+  all.params <- c('x1', 'x2', 'x3', 'x4', 'x5', '_const', 'sigma')
   
-  model.res1 <- mle.linear.estimate(df$y, df[c('x1', 'x3', 'x4', 'const')])
-  model.res2 <- mle.linear.estimate(df$y, df[c('x1', 'x2', 'x4', 'const')])
-  model.res3 <- mle.linear.estimate(df$y, df[c('x1', 'x2', 'x3', 'x4', 'const')])
+  model.res1 <- mle.linear.estimate(df$y, df[c('x1', 'x3', 'x4')])
+  model.res2 <- mle.linear.estimate(df$y, df[c('x1', 'x2', 'x4')])
+  model.res3 <- mle.linear.estimate(df$y, df[c('x1', 'x2', 'x3', 'x4')])
   
   res.table <- mle.res.table.export(list(model.res1, model.res2, model.res3), all.params)
   print(res.table)

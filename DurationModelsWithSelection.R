@@ -39,12 +39,12 @@ exp.selection.lnlike <- function(theta, args){
 
 exp.selection.mle.estimate <- function(y, X, z, W, d){
   args <- list(y=y, X=as.matrix(X), z=z, W=as.matrix(W), d=d)
-  args <- na.drop(args, assign.lbs=c('z', 'W'))
+  args <- na.drop(args, assign.lbs=c('z', 'W'), add.const=FALSE)
   args <- na.drop(args, assign.lbs=c('y', 'X', 'd'), exempt.cond=(args$z==0))
   
-  params0 <- rep(1e-5, length(W)+length(X)+1)
-  names(params0) <- c(paste0('W.', colnames(W)),
-                      paste0('X.', colnames(X)),
+  params0 <- rep(1e-5, dim(args$W)[2]+dim(args$X)[2]+1)
+  names(params0) <- c(paste0('W.', colnames(args$W)),
+                      paste0('X.', colnames(args$X)),
                       'atanhalpha')
   model.res <- mle.model(exp.selection.lnlike, args, params0=params0, gr=NULL)
   return(model.res)
@@ -89,15 +89,15 @@ weibull.selection.lnlike <- function(theta, args){
 
 weibull.selection.mle.estimate <- function(y, X, z, W, d){
   args <- list(y=y, X=as.matrix(X), z=z, W=as.matrix(W), d=d)
-  args <- na.drop(args, assign.lbs=c('z', 'W'))
+  args <- na.drop(args, assign.lbs=c('z', 'W'), add.const=FALSE)
   args <- na.drop(args, assign.lbs=c('y', 'X', 'd'), exempt.cond=(args$z==0))
   
   # params0 <- c(-.08711482, -.07519727, .01080475, .03833166, .02785502, .18414317, -.05496903, -1.7385206,
   #              .80768861, -1.9593325, .51412655, -.14661611, .3337918, .37420079, 1.0725059, -.65164642)
   # print(weibull.selection.lnlike(params0, args))
-  params0 <- rep(1e-5, length(W)+length(X)+2)
-  names(params0) <- c(paste0('W.', colnames(W)),
-                      paste0('X.', colnames(X)),
+  params0 <- rep(1e-5, dim(args$W)[2]+dim(args$X)[2]+2)
+  names(params0) <- c(paste0('W.', colnames(args$W)),
+                      paste0('X.', colnames(args$X)),
                       'atanhalpha', 'lnp')
   model.res <- mle.model(weibull.selection.lnlike, args, params0=params0, gr=NULL)
   return(model.res)
@@ -106,15 +106,14 @@ weibull.selection.mle.estimate <- function(y, X, z, W, d){
 duration.selection.demo <- function(){
   library('foreign')
   df <- read.dta('war.dta')
-  df$const <- 1
   all.params <- c('W.democ', 'W.autoc', 'W.tennewL', 'W.tennewAL', 'W.total', 'W.majpow',
-                  'W.lntropen', 'W.const', 'X.tenl', 'X.democ', 'X.tendem', 'X.rdpopl',
-                  'X.rwin', 'X.const', 'atanhalpha', 'lnp')
+                  'W.lntropen', 'W._const', 'X.tenl', 'X.democ', 'X.tendem', 'X.rdpopl',
+                  'X.rwin', 'X._const', 'atanhalpha', 'lnp')
   
   y <- df$wsurv
-  X <- df[c('tenl', 'democ', 'tendem', 'rdpopl', 'rwin', 'const')]
+  X <- df[c('tenl', 'democ', 'tendem', 'rdpopl', 'rwin')]
   z <- df$enter
-  W <- df[c('democ', 'autoc', 'tennewL', 'tennewAL', 'total', 'majpow', 'lntropen', 'const')]
+  W <- df[c('democ', 'autoc', 'tennewL', 'tennewAL', 'total', 'majpow', 'lntropen')]
   d <- df$rtcensor
   
   exp.res <- exp.selection.mle.estimate(y, X, z, W, d)

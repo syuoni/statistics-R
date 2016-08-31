@@ -71,9 +71,12 @@ heckman.gr <- function(theta, args){
 
 heckman.mle.estimate <- function(y, X, z, W){
   args <- list(y=y, X=as.matrix(X), z=z, W=as.matrix(W))
-  params0 <- rep(1e-5, length(W)+length(X)+2)
-  names(params0) <- c(paste0('W.', colnames(W)), 
-                      paste0('X.', colnames(X)), 
+  args <- na.drop(args, assign.lbs=c('z', 'W'), add.const=FALSE)
+  args <- na.drop(args, assign.lbs=c('y', 'X'), exempt.cond=(args$z==0))
+  
+  params0 <- rep(1e-5, dim(args$W)[2]+dim(args$X)[2]+2)
+  names(params0) <- c(paste0('W.', colnames(args$W)), 
+                      paste0('X.', colnames(args$X)), 
                       'atanhrho', 'lnsigma')
   model.res <- mle.model(heckman.lnlike, args, params0=params0, gr=heckman.gr)
   return(model.res)
@@ -82,12 +85,11 @@ heckman.mle.estimate <- function(y, X, z, W){
 heckman.demo <- function(){
   library('foreign')
   df <- read.dta('womenwk.dta')
-  df$const <- 1
   
   y <- df$lw
-  X <- df[c('education', 'age', 'children', 'const')]
+  X <- df[c('education', 'age', 'children')]
   z <- ifelse(is.na(y), 0, 1)
-  W <- df[c('age', 'married', 'children', 'education', 'const')]
+  W <- df[c('age', 'married', 'children', 'education')]
   
   # in this model, optimization result would be better if setting the initial params=[1e-4, 1e-4, ...]
   # lnlike: 1052.857 -> 1044.652

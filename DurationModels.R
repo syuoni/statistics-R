@@ -30,12 +30,13 @@ exp.gr <- function(beta, args){
 # d: vector of whether the sample is failed (1=failure)
 mle.exp.estimate <- function(t, X, d){
   args <- list(t=t, X=as.matrix(X), d=d)
+  args <- na.drop(args)
   
   # with specifying gradient function, the result would be accurate (consistent to Stata)
   # without gradient function, a finite-difference approximation will be used
   # the initial params0 should not make likelihood function return a infinite value
-  params0 <- rep(1e-5, length(X))
-  names(params0) <- colnames(X)
+  params0 <- rep(1e-5, dim(args$X)[2])
+  names(params0) <- colnames(args$X)
   model.res <- mle.model(exp.lnlike, args, params0=params0, gr=exp.gr)
   return(model.res)
 }
@@ -76,8 +77,10 @@ weibull.gr <- function(theta, args){
 
 mle.weibull.estimate <- function(t, X, d){
   args <- list(t=t, X=as.matrix(X), d=d)
-  params0 <- rep(1e-5, length(X)+1)
-  names(params0) <- c(colnames(X), 'lnp')
+  args <- na.drop(args)
+  
+  params0 <- rep(1e-5, dim(args$X)[2]+1)
+  names(params0) <- c(colnames(args$X), 'lnp')
   model.res <- mle.model(weibull.lnlike, args, params0=params0, gr=weibull.gr)
   return(model.res)
 }
@@ -115,8 +118,10 @@ gompertz.gr <- function(theta, args){
 
 mle.gompertz.estimate <- function(t, X, d){
   args <- list(t=t, X=as.matrix(X), d=d)
-  params0 <- rep(1e-5, length(X)+1)
-  names(params0) <- c(colnames(X), 'gamma')
+  args <- na.drop(args)
+  
+  params0 <- rep(1e-5, dim(args$X)[2]+1)
+  names(params0) <- c(colnames(args$X), 'gamma')
   model.res <- mle.model(gompertz.lnlike, args, params0=params0, gr=gompertz.gr)
   return(model.res)
 }
@@ -125,12 +130,11 @@ duration.demo <- function(){
   library('foreign')
   df <- read.dta('recid.dta')
   all.params <- c('workprg', 'priors', 'tserved', 'felon', 'alcohol',
-                  'drugs', 'black', 'married', 'educ', 'age', 'lnp', 'gamma')
+                  'drugs', 'black', 'married', 'educ', 'age', '_const', 'lnp', 'gamma')
   
   X <- df[c('workprg', 'priors', 'tserved', 'felon', 'alcohol',
             'drugs', 'black', 'married', 'educ', 'age')]
-  X$const <- 1
-  
+
   exp.res <- mle.exp.estimate(df$durat, X, 1-df$cens)
   # exponential model result from Stata
   # args <- list(t=df$durat, X=as.matrix(X), d=1-df$cens)

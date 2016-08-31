@@ -1,3 +1,4 @@
+# Export regression results as a table
 get.sig.stars <- function(p){
   if(is.na(p)){
     return('')

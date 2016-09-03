@@ -2,7 +2,7 @@
 # Boehmke F J, Morey D S, Shannon M. 
 # Selection Bias and Continuous©\Time Duration Models: Consequences and a Proposed Solution[J]. 
 # American Journal of Political Science, 2006, 50(1): 192-207.
-setwd('D:/Documents/R/Statistics and Econometrics')
+setwd('D:/Documents/R/Statistics and Econometrics/MaximunLikelihoodEstimation')
 source('MLE.R')
 
 exp.selection.lnlike <- function(theta, args){

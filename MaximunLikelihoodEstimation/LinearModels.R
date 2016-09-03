@@ -1,5 +1,5 @@
 # Linear Models Estimation with MLE
-setwd('D:/Documents/R/Statistics and Econometrics')
+setwd('D:/Documents/R/Statistics and Econometrics/MaximunLikelihoodEstimation')
 source('MLE.R')
 
 # y~const
